@@ -1,0 +1,36 @@
+/*Zerando a margem e o preenchimento para evitar problemas com espaçamentos dos elementos em navegadores diversos.*/
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/*Delimitando o tamanho a tela visível do jogo e ocultando elementos que "transbordam" dela.*/
+.tela {
+    width: 80%;
+    height: 500px;
+    border: 1px solid #133;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+/*Aplicando a sprite do carro.*/
+.carro {
+    position: absolute;
+    bottom: 0;
+    width: 80px;
+    left: 0%;
+    animation: animacao-do-carro 2s infinite linear;
+}
+
+/*Determinando o funcionamento da animação da sprite do carro e determinando seu início para antes da área visível da tela, transmitindo, assim, uma ideia de movimento prévio. */
+@keyframes animacao-do-carro {
+    from {
+        left: -25%;
+    }
+    to {
+        left: 100%;
+    }
+
+}
