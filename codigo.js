@@ -4,11 +4,12 @@ const DOWN = {x: 0, y: 1};
 const RIGHT = {x: 1, y:0};
 const LEFT = {x: -1, y:0};
 
-// Passo = 25; -> tamanho da distância percorrida pelo sapo por tecla pressionada
+// passo = 25; -> tamanho da distância percorrida pelo sapo por tecla pressionada
 
+/* Constante que armazena as informações iniciais dos elementos em tela.*/
 const initialState = () => ({
     sapo: {
-        x: 600 / 2 - 25, // centralizado na largura do canvas de 600px
+        x: 600/2 - 25, // centralizado na largura do canvas de 600px
         y: 400 - 50,     // perto da base do canvas de 400px
         largura: 50,
         altura: 50,
@@ -54,22 +55,29 @@ function gameloop(){
 }
 
 window.addEventListener('keydown', e => {
+    /*o paradigma funcional não admite a utilização de variáveis, entretanto,
+    para que um elemento possa se movimentar livremente pela tela, suas coordenadas
+    não podem ser fixas, e, assim, constantes. Nesse caso, demonstra-se imprescindível
+    o uso de uma variável. */
     let proximoestado = estadoatual;
     // obter a nova posição do sapo
     switch(e.key){
+        /*quando alguma seta é pressionada, o programa detecta se as coordenadas do sapo, considerando suas dimensões,
+        estão em algum limite do canva, caso estejam, será retornada a mesma posição, do contrário, a função moversapo
+        é executada.*/
         case 'ArrowUp':
-            proximoestado = moversapo(estadoatual, UP);
+            proximoestado = (estadoatual.sapo.y > 0) ? moversapo(estadoatual, UP) : estadoatual;
             break;
         case 'ArrowDown':
-            proximoestado = moversapo(estadoatual, DOWN);
+            proximoestado = (estadoatual.sapo.y < (400 - estadoatual.sapo.altura)) ? moversapo(estadoatual, DOWN) : estadoatual;
             break;
         case 'ArrowLeft':
-            proximoestado = moversapo(estadoatual, LEFT);
+            proximoestado = (estadoatual.sapo.x > 0) ? moversapo(estadoatual, LEFT) : estadoatual;
             break;
         case 'ArrowRight':
-            proximoestado = moversapo(estadoatual, RIGHT);
+            proximoestado = (estadoatual.sapo.x < (600 - estadoatual.sapo.largura)) ? moversapo(estadoatual, RIGHT) : estadoatual;
             break;
-    }
+}  
     estadoatual = proximoestado;
 })
 
