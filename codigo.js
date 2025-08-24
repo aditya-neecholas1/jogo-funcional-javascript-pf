@@ -1,8 +1,8 @@
 // constantes para a movimentação
-const UP  = {x: 0, y: -1};
-const DOWN = {x: 0, y: 1};
-const RIGHT = {x: 1, y:0};
-const LEFT = {x: -1, y:0};
+const UP  = {x: 0, y: -1}
+const DOWN = {x: 0, y: 1}
+const RIGHT = {x: 1, y:0}
+const LEFT = {x: -1, y:0}
 
 // passo = 25; -> tamanho da distância percorrida pelo sapo por tecla pressionada
 
@@ -16,13 +16,38 @@ const initialState = () => ({
     },
     carro1: {
         x: -50,
-        y: 100,
-        largura: 50,
+        y: 60,
+        largura: 80,
         altura: 50,
-        velocidade: 4
+        velocidade: 4,
+        cor: '#c0392b'
+    },
+    carro2: {
+        x: 620,
+        y: 130,
+        largura: 80,
+        altura: 50,
+        velocidade: -3,
+        cor: '#2980b9'
+    }, 
+    carro3: {
+        x: -80,
+        y: 200,
+        largura: 80,
+        altura: 50,
+        velocidade: 3.5,
+        cor: '#f1c40f'
+    },
+    carro4: {
+        x: 650,  
+        y: 270, 
+        largura: 100, 
+        altura: 50, 
+        velocidade: -2.5, 
+        cor: '#8e44ad'
     }
 });
-
+// função pura que calcula o próximo estado do sapo
 const moversapo = (estado, direcao) => {
     const novoestado = {
         ...estado, // uso do spread para não modificar o original
@@ -32,57 +57,101 @@ const moversapo = (estado, direcao) => {
             y: estado.sapo.y + direcao.y * 25, // atualiza o y
         }
     };
-    return novoestado;
+    return novoestado
 };
 
 /*Função que faz um obstaculo se mover horizontalmente por tempo indefinido*/
 const movercarros = (estado) => {
-    const estadonovo = {
+    const proxCarro1 = {
+        ...estado.carro1,
+        x: (estado.carro1.x + estado.carro1.velocidade > 600) ? -estado.carro1.largura - 5 : estado.carro1.x + estado.carro1.velocidade,
+    };
+
+    // Calcula a próxima posição do carro 2 (note a lógica invertida para velocidade negativa)
+    const proxCarro2 = {
+        ...estado.carro2,
+        x: (estado.carro2.x + estado.carro2.velocidade < -estado.carro2.largura) ? 605 : estado.carro2.x + estado.carro2.velocidade,
+    };
+
+    // Calcula a próxima posição do carro 3
+    const proxCarro3 = {
+        ...estado.carro3,
+        x: (estado.carro3.x + estado.carro3.velocidade > 600) ? -estado.carro3.largura - 5 : estado.carro3.x + estado.carro3.velocidade,
+    };
+    
+    // Calcula a próxima posição do carro 4
+    const proxCarro4 = {
+        ...estado.carro4,
+        x: (estado.carro4.x + estado.carro4.velocidade < -estado.carro4.largura) ? 605 : estado.carro4.x + estado.carro4.velocidade,
+    };
+
+    // Retorna um novo objeto de estado com a cópia do sapo e todos os carros atualizados
+    return {
         ...estado,
-        carro1: {
-            ...estado.carro1,
-            x: (estado.carro1.x + estado.carro1.velocidade > 600) ? 
-            -estado.carro1.largura - 5 // Reinicia o movimento antes da tela para dar fluidez.
-            : estado.carro1.x + estado.carro1.velocidade
-             /* o operador resto em relação a 600 fará com que o carro reinicie sua movimentação
-              quando atingir o limite do canvas acrescido da largura da figura, de modo que
-              o movimemto pareça mais flúido.*/
-        }
-    }
-    return estadonovo
-}
+        carro1: proxCarro1,
+        carro2: proxCarro2,
+        carro3: proxCarro3,
+        carro4: proxCarro4,
+    };
+};
+
+const colidiu = (carro, sapo) => {
+    return !(
+        carro.x + carro.largura < sapo.x ||
+        carro.x > sapo.x + sapo.largura ||
+        carro.y + carro.altura  < sapo.y ||
+        carro.y > sapo.y + sapo.altura
+    )
+};
+
+const finalizou = (sapo) => sapo.y <= 0
 
 // obtenção dos elementos HTML e interação com o DOM
 const canvas = document.querySelector('#frogger')
 const ctx = canvas.getContext('2d')
 
-const sapoimg = new Image();
+const sapoimg = new Image()
 sapoimg.src = "imagens/sapo.png" //carregamento de imagens
 
-let estadoatual = initialState();
+let estadoatual = initialState()
 
 function draw(){
     // primeiramente limpamos a tela
-    ctx.fillStyle ='#eff1f3';
+    ctx.fillStyle ='#eff1f3'
 
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    // desenhando os carros 
+    ctx.fillStyle = estadoatual.carro1.cor;
+    ctx.fillRect(estadoatual.carro1.x, estadoatual.carro1.y, estadoatual.carro1.largura, estadoatual.carro1.altura)
 
-    ctx.fillStyle = "red";
-    const carro1 = estadoatual.carro1;
-    ctx.fillRect(carro1.x, carro1.y, carro1.largura, carro1.altura);
+    ctx.fillStyle = estadoatual.carro2.cor;
+    ctx.fillRect(estadoatual.carro2.x, estadoatual.carro2.y, estadoatual.carro2.largura, estadoatual.carro2.altura)
+
+    ctx.fillStyle = estadoatual.carro3.cor;
+    ctx.fillRect(estadoatual.carro3.x, estadoatual.carro3.y, estadoatual.carro3.largura, estadoatual.carro3.altura)
+
+    ctx.fillStyle = estadoatual.carro4.cor;
+    ctx.fillRect(estadoatual.carro4.x, estadoatual.carro4.y, estadoatual.carro4.largura, estadoatual.carro4.altura)
 
     // agora desenhamos o sapo utilizando os dados novos
     if(sapoimg.complete){
-        const sapo = estadoatual.sapo;
-        ctx.drawImage(sapoimg, sapo.x, sapo.y, sapo.largura, sapo.altura);
+        const sapo = estadoatual.sapo
+        ctx.drawImage(sapoimg, sapo.x, sapo.y, sapo.largura, sapo.altura)
     }
 }
 
 // utilização do 'requestAnimationFrame' para otimizar a animação
 function gameloop(){
-    estadoatual = movercarros(estadoatual);
-    draw();
-    window.requestAnimationFrame(gameloop);
+    let proximoestado = movercarros(estadoatual)
+    const frog = proximoestado.sapo
+    if(colidiu(frog, proximoestado.carro1) ||
+       colidiu(frog, proximoestado.carro2) ||
+       colidiu(frog, proximoestado.carro3) ||
+       colidiu(frog, proximoestado.carro4)
+    ) proximoestado = initialState() // Caso haja colisão, resetamos o jogo
+    estadoatual = proximoestado
+    draw()
+    window.requestAnimationFrame(gameloop)
 }
 
 window.addEventListener('keydown', e => {
@@ -90,25 +159,29 @@ window.addEventListener('keydown', e => {
     para que um elemento possa se movimentar livremente pela tela, suas coordenadas
     não podem ser fixas, e, assim, constantes. Nesse caso, demonstra-se imprescindível
     o uso de uma variável. */
-    let proximoestado = estadoatual;
+    let proximoestado = estadoatual
     // obter a nova posição do sapo
     switch(e.key){
         /*quando alguma seta é pressionada, o programa detecta se as coordenadas do sapo, considerando suas dimensões,
         estão em algum limite do canva, caso estejam, será retornada a mesma posição, do contrário, a função moversapo
         é executada.*/
         case 'ArrowUp':
-            proximoestado = (estadoatual.sapo.y > 0) ? moversapo(estadoatual, UP) : estadoatual;
+            proximoestado = (estadoatual.sapo.y > 0) ? moversapo(estadoatual, UP) : estadoatual
             break;
         case 'ArrowDown':
-            proximoestado = (estadoatual.sapo.y < (400 - estadoatual.sapo.altura)) ? moversapo(estadoatual, DOWN) : estadoatual;
+            proximoestado = (estadoatual.sapo.y < (400 - estadoatual.sapo.altura)) ? moversapo(estadoatual, DOWN) : estadoatual
             break;
         case 'ArrowLeft':
-            proximoestado = (estadoatual.sapo.x > 0) ? moversapo(estadoatual, LEFT) : estadoatual;
+            proximoestado = (estadoatual.sapo.x > 0) ? moversapo(estadoatual, LEFT) : estadoatual
             break;
         case 'ArrowRight':
-            proximoestado = (estadoatual.sapo.x < (600 - estadoatual.sapo.largura)) ? moversapo(estadoatual, RIGHT) : estadoatual;
+            proximoestado = (estadoatual.sapo.x < (600 - estadoatual.sapo.largura)) ? moversapo(estadoatual, RIGHT) : estadoatual
             break;
-}  
+    }   
+    if(finalizou(proximoestado.sapo)){
+        console.log("Você venceu. Resetando...")
+        proximoestado = initialState();
+    }
     estadoatual = proximoestado;
 })
 
