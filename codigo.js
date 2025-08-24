@@ -13,6 +13,13 @@ const initialState = () => ({
         y: 400 - 50,     // perto da base do canvas de 400px
         largura: 50,
         altura: 50,
+    },
+    carro1: {
+        x: -50,
+        y: 100,
+        largura: 50,
+        altura: 50,
+        velocidade: 4
     }
 });
 
@@ -28,6 +35,23 @@ const moversapo = (estado, direcao) => {
     return novoestado;
 };
 
+/*Função que faz um obstaculo se mover horizontalmente por tempo indefinido*/
+const movercarros = (estado) => {
+    const estadonovo = {
+        ...estado,
+        carro1: {
+            ...estado.carro1,
+            x: (estado.carro1.x + estado.carro1.velocidade > 600) ? 
+            -estado.carro1.largura - 5 // Reinicia o movimento antes da tela para dar fluidez.
+            : estado.carro1.x + estado.carro1.velocidade
+             /* o operador resto em relação a 600 fará com que o carro reinicie sua movimentação
+              quando atingir o limite do canvas acrescido da largura da figura, de modo que
+              o movimemto pareça mais flúido.*/
+        }
+    }
+    return estadonovo
+}
+
 // obtenção dos elementos HTML e interação com o DOM
 const canvas = document.querySelector('#frogger')
 const ctx = canvas.getContext('2d')
@@ -40,7 +64,13 @@ let estadoatual = initialState();
 function draw(){
     // primeiramente limpamos a tela
     ctx.fillStyle ='#eff1f3';
+
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "red";
+    const carro1 = estadoatual.carro1;
+    ctx.fillRect(carro1.x, carro1.y, carro1.largura, carro1.altura);
+
     // agora desenhamos o sapo utilizando os dados novos
     if(sapoimg.complete){
         const sapo = estadoatual.sapo;
@@ -50,6 +80,7 @@ function draw(){
 
 // utilização do 'requestAnimationFrame' para otimizar a animação
 function gameloop(){
+    estadoatual = movercarros(estadoatual);
     draw();
     window.requestAnimationFrame(gameloop);
 }
