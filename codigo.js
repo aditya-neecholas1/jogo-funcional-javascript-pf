@@ -22,30 +22,22 @@ const initialState = () => ({
         velocidade: 4,
         cor: '#c0392b'
     },
+   
     carro2: {
-        x: 620,
-        y: 130,
-        largura: 80,
-        altura: 50,
-        velocidade: -3,
-        cor: '#2980b9'
-    }, 
-    carro3: {
-        x: -80,
-        y: 200,
-        largura: 80,
-        altura: 50,
-        velocidade: 3.5,
-        cor: '#f1c40f'
-    },
-    carro4: {
         x: 650,  
         y: 270, 
         largura: 100, 
         altura: 50, 
         velocidade: -2.5, 
         cor: '#8e44ad'
-    }
+    },
+    lago: { 
+        x: 0,
+        y: 120,
+        largura: 600,
+        altura: 140, 
+        cor: '#add8e6',
+    },
 });
 // função pura que calcula o próximo estado do sapo
 const moversapo = (estado, direcao) => {
@@ -67,22 +59,10 @@ const movercarros = (estado) => {
         x: (estado.carro1.x + estado.carro1.velocidade > 600) ? -estado.carro1.largura - 5 : estado.carro1.x + estado.carro1.velocidade,
     };
 
-    // Calcula a próxima posição do carro 2 (note a lógica invertida para velocidade negativa)
+    // Calcula a próxima posição do carro 2
     const proxCarro2 = {
         ...estado.carro2,
         x: (estado.carro2.x + estado.carro2.velocidade < -estado.carro2.largura) ? 605 : estado.carro2.x + estado.carro2.velocidade,
-    };
-
-    // Calcula a próxima posição do carro 3
-    const proxCarro3 = {
-        ...estado.carro3,
-        x: (estado.carro3.x + estado.carro3.velocidade > 600) ? -estado.carro3.largura - 5 : estado.carro3.x + estado.carro3.velocidade,
-    };
-    
-    // Calcula a próxima posição do carro 4
-    const proxCarro4 = {
-        ...estado.carro4,
-        x: (estado.carro4.x + estado.carro4.velocidade < -estado.carro4.largura) ? 605 : estado.carro4.x + estado.carro4.velocidade,
     };
 
     // Retorna um novo objeto de estado com a cópia do sapo e todos os carros atualizados
@@ -90,17 +70,15 @@ const movercarros = (estado) => {
         ...estado,
         carro1: proxCarro1,
         carro2: proxCarro2,
-        carro3: proxCarro3,
-        carro4: proxCarro4,
     };
 };
 
-const colidiu = (carro, sapo) => {
+const colidiu = (objeto, sapo) => {
     return !(
-        carro.x + carro.largura < sapo.x ||
-        carro.x > sapo.x + sapo.largura ||
-        carro.y + carro.altura  < sapo.y ||
-        carro.y > sapo.y + sapo.altura
+        objeto.x + objeto.largura < sapo.x ||
+        objeto.x > sapo.x + sapo.largura ||
+        objeto.y + objeto.altura  < sapo.y ||
+        objeto.y > sapo.y + sapo.altura
     )
 };
 
@@ -127,27 +105,24 @@ function draw(){
     ctx.fillStyle = estadoatual.carro2.cor;
     ctx.fillRect(estadoatual.carro2.x, estadoatual.carro2.y, estadoatual.carro2.largura, estadoatual.carro2.altura)
 
-    ctx.fillStyle = estadoatual.carro3.cor;
-    ctx.fillRect(estadoatual.carro3.x, estadoatual.carro3.y, estadoatual.carro3.largura, estadoatual.carro3.altura)
-
-    ctx.fillStyle = estadoatual.carro4.cor;
-    ctx.fillRect(estadoatual.carro4.x, estadoatual.carro4.y, estadoatual.carro4.largura, estadoatual.carro4.altura)
-
     // agora desenhamos o sapo utilizando os dados novos
     if(sapoimg.complete){
         const sapo = estadoatual.sapo
         ctx.drawImage(sapoimg, sapo.x, sapo.y, sapo.largura, sapo.altura)
     }
+    // desenhando o lago 
+    const lago = estadoatual.lago;
+    ctx.fillStyle = lago.cor;
+    ctx.fillRect(lago.x, lago.y, lago.largura, lago.altura );
 }
 
 // utilização do 'requestAnimationFrame' para otimizar a animação
 function gameloop(){
     let proximoestado = movercarros(estadoatual)
     const frog = proximoestado.sapo
-    if(colidiu(frog, proximoestado.carro1) ||
+    if(colidiu(frog, proximoestado.carro1) || // verifica se ocorreu a colisão entre o sapo e os carros ou o lago
        colidiu(frog, proximoestado.carro2) ||
-       colidiu(frog, proximoestado.carro3) ||
-       colidiu(frog, proximoestado.carro4)
+       colidiu(frog, proximoestado.lago) 
     ) proximoestado = initialState() // Caso haja colisão, resetamos o jogo
     estadoatual = proximoestado
     draw()
