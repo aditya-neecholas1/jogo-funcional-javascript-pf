@@ -1,8 +1,8 @@
 // constantes para a movimentação
-const UP  = {x: 0, y: -1}
-const DOWN = {x: 0, y: 1}
-const RIGHT = {x: 1, y:0}
-const LEFT = {x: -1, y:0}
+const UP  = {x: 1, y: -1}
+const DOWN = {x: 1, y: 1}
+const RIGHT = {x: -1, y:1}
+const LEFT = {x: -1, y:-1}
 
 // passo = 25; -> tamanho da distância percorrida pelo sapo por tecla pressionada
 
