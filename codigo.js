@@ -4,25 +4,39 @@ const DOWN = {x: 0, y: 1}
 const RIGHT = {x: 1, y:0}
 const LEFT = {x: -1, y:0}
 
+//Constantes que armazenam os sons.
+const somdosapo = document.getElementById("somdosapo")
+const somdesplash = document.getElementById("somdesplash")
+const somdecolisão = document.getElementById("somdecolisão")
+
 // Passo = 25; -> tamanho da distância percorrida pelo sapo por tecla pressionada.
 
 /* Constante que armazena as informações iniciais dos elementos em tela. */
 const initialState = () => ({
+    GameStatus: "jogando", 
     sapo: {
         x: 600/2 - 25, // Centralizado na largura do canvas de 600px.
         y: 400 - 50,     // Perto da base do canvas de 400px.
         largura: 50,
         altura: 50,
+        cor: "#09d53fff"
     },
     carro1: {
         x: -50,
         y: 60,
-        largura: 80,
+        largura: 90,
         altura: 50,
         velocidade: 4,
         cor: '#c0392b'
     },
-   
+    carro3:{
+        x: -400,
+        y: 60,
+        largura: 90,
+        altura: 50,
+        velocidade: 4,
+        cor: "#c0992b"
+    },
     carro2: {
         x: 650,  
         y: 270, 
@@ -32,31 +46,40 @@ const initialState = () => ({
         cor: '#8e44ad'
     },
     lago: { 
-        x: 0,
+        x: -200,
         y: 120,
-        largura: 600,
-        altura: 120, 
-        cor: '#add8e6',
+        largura: 800,
+        altura: 135, 
+        cor: '#338dabff',
     },
-    tronco1: {
-        x: -80,
-        y:120,
-        largura:80, //eixo x de comprimento
-        altura:60, //eixo y de comprimento
-        velocidade: 0.5,
-        cor:'#582d079a'
+    tronco1:{
+        x: -150,
+        y: 120,
+        largura: 140,
+        altura: 45,
+        velocidade: 1,
+        cor: "#58381cff"
     },
-     tronco2: {
-        x: -50,  
-        y: 180, 
-        largura: 80, //eixo x de comprimento
-        altura: 60, //eixo y de comprimento 
-        velocidade: -0.5,
-        cor:'#582d079a'
+    tronco2:{
+        x: 800,
+        y: 165,
+        largura: 180,
+        altura: 45,
+        velocidade: -1,
+        cor: "#58381cff"
     },
+    tronco3:{
+        x: -300,
+        y:210,
+        largura:100,
+        altura: 45,
+        velocidade: 1,
+        cor: "#58381cff"
+    }
 })
 
-// função pura que calcula o próximo estado do sapo.
+
+// Função pura que calcula o próximo estado do sapo.
 const moversapo = (estado, direcao) => {
     const novoestado = {
         ...estado, // Uso do spread para não modificar o original.
@@ -69,6 +92,7 @@ const moversapo = (estado, direcao) => {
     return novoestado
 }
 
+
 /* Função que faz os carros se moverem por tempo indefinido, copiando as informações contidas em seus
 registros e, em seguida, modificando estas de acordo com as seguintes lógicas: */
 const movercarros = (estado) => {
@@ -80,45 +104,56 @@ const movercarros = (estado) => {
 
     const proxCarro1 = { // Constante que guarda a próxima posição do carro1.
         ...estado.carro1,
-        x: (estado.carro1.x + estado.carro1.velocidade > 600) ? -estado.carro1.largura - 5 : estado.carro1.x + estado.carro1.velocidade,
+        x: (estado.carro1.x + estado.carro1.velocidade > 600) ? -estado.carro1.largura - 5 : estado.carro1.x + estado.carro1.velocidade
     }
 
-     /* Para os carros que se movem da direita pra esquerda (2,4) - Se a soma da posição x com a velociade
+    const proxCarro3 = { // Constante que guarda a próxima posição do carro3.
+        ...estado.carro3,
+        x: (estado.carro3.x + estado.carro3.velocidade > 600) ? -estado.carro3.largura - 5 : estado.carro3.x + estado.carro3.velocidade
+    }
+
+     /* Para o carros que se movem da direita pra esquerda - Se a soma da posição x com a velociade
     (negativa) ultrapassar o limite esquerdo do canva (0), a função retorna um valor maior que 600 para
     que a figura surja depois da tela, conferindo, assim, maior fluidez ao movimento, do contrário, a
     função retorna apenas a soma da posição com a velocidade. */
 
     const proxCarro2 = { // Constante que guarda a próxima posição do carro2.
         ...estado.carro2,
-        x: (estado.carro2.x + estado.carro2.velocidade < -estado.carro2.largura) ? 605 : estado.carro2.x + estado.carro2.velocidade,
+        x: (estado.carro2.x + estado.carro2.velocidade < -estado.carro2.largura) ? 605 : estado.carro2.x + estado.carro2.velocidade
     }
 
     return { // Retorna um novo objeto de estado com a cópia do sapo e todos os carros atualizados.
         ...estado,
         carro1: proxCarro1,
         carro2: proxCarro2,
+        carro3: proxCarro3
     }
 }
 
-//seguimos a mesma lógica da função movercarros//
+/*Seguindo a mesma lógica da função para mover carros: */
 const moverObjetosLago = (estado) => {
-    const proxtronco1 = { //constante que guarda a próxima posição do tronco1
+    const proxTronco1 = { // Constante que guarda a próxima posição do tronco1
         ...estado.tronco1,
-        x: (estado.tronco1.x + estado.tronco1.velocidade > 600) ? -estado.tronco1.largura -5 : estado.tronco1.x + estado.tronco1.velocidade,
-    }
-    const proxtronco2 = { //constante que guarda a próxima posição do tronco2
-        ...estado.tronco2,
-        x: (estado.tronco2.x + estado.tronco2.velocidade < -estado.tronco2.largura) ? 605 : estado.tronco2.x + estado.tronco2.velocidade, 
+        x: (estado.tronco1.x + estado.tronco1.velocidade > 600) ? -estado.tronco1.largura - 5 : estado.tronco1.x + estado.tronco1.velocidade
     }
 
-    return{ //retorna um novo objeto de estado com a cópia do sapo e todos os carros atualizados
- 
+    const proxTronco2 = { // Constante que guarda a próxima posição do tronco2
+        ...estado.tronco2,
+        x: (estado.tronco2.x + estado.tronco2.velocidade < -estado.tronco2.largura) ? 605 : estado.tronco2.x + estado.tronco2.velocidade
+    }
+
+    const proxTronco3 = {// Constante que guarad a próxima posição do tronco3
+        ...estado.tronco3,
+        x: (estado.tronco3.x + estado.tronco3.velocidade > 600) ? -estado.tronco3.largura - 5 : estado.tronco3.x + estado.tronco3.velocidade
+    }
+
+    return { // Retorna um novo objeto de estado com a cópia do sapo e todos os troncos atualizados.
         ...estado,
-            tronco1: proxtronco1,
-            tronco2: proxtronco2
+        tronco1: proxTronco1,
+        tronco2: proxTronco2,
+        tronco3: proxTronco3
     }
 }
-
 
 const colidiu = (objeto, sapo) => {
     return !(
@@ -134,23 +169,13 @@ const finalizou = (sapo) => sapo.y <= 0
 // Obtenção dos elementos HTML e interação com o DOM.
 const canvas = document.querySelector('#frogger')
 const ctx = canvas.getContext('2d')
-
-const sapoimg = new Image()
-sapoimg.src = "imagens/sapo.png" // Carregamento de imagens.
-
 let estadoatual = initialState()
-let situação = 'jogando';//situação "jogando" para conseguir colocar a tela do game over
 
+// Função que define como os elementos do jogo, enquanto este estiver ativo, serão desenhados.
 function draw(){
     // Primeiramente limpamos a tela.
     ctx.fillStyle ='#eff1f3'
-
     ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-    // Desenhando o lago.
-    const lago = estadoatual.lago;
-    ctx.fillStyle = lago.cor;
-    ctx.fillRect(lago.x, lago.y, lago.largura, lago.altura );
 
     // Desenhando os carros.
     ctx.fillStyle = estadoatual.carro1.cor;
@@ -159,21 +184,31 @@ function draw(){
     ctx.fillStyle = estadoatual.carro2.cor;
     ctx.fillRect(estadoatual.carro2.x, estadoatual.carro2.y, estadoatual.carro2.largura, estadoatual.carro2.altura)
 
-    //desenhando os troncos
+    ctx.fillStyle = estadoatual.carro3.cor;
+    ctx.fillRect(estadoatual.carro3.x, estadoatual.carro3.y, estadoatual.carro3.largura, estadoatual.carro3.altura)
+
+    // Desenhando o lago.
+    const lago = estadoatual.lago
+    ctx.fillStyle = lago.cor;
+    ctx.fillRect(lago.x, lago.y, lago.largura, lago.altura )
+
+    //Desenhando os troncos.
     ctx.fillStyle = estadoatual.tronco1.cor;
     ctx.fillRect(estadoatual.tronco1.x, estadoatual.tronco1.y, estadoatual.tronco1.largura, estadoatual.tronco1.altura)
 
     ctx.fillStyle = estadoatual.tronco2.cor;
     ctx.fillRect(estadoatual.tronco2.x, estadoatual.tronco2.y, estadoatual.tronco2.largura, estadoatual.tronco2.altura)
 
+    ctx.fillStyle = estadoatual.tronco3.cor;
+    ctx.fillRect(estadoatual.tronco3.x, estadoatual.tronco3.y, estadoatual.tronco3.largura, estadoatual.tronco3.altura)
 
-    // Agora desenhamos o sapo utilizando os dados novos.
-    if(sapoimg.complete){
-        const sapo = estadoatual.sapo
-        ctx.drawImage(sapoimg, sapo.x, sapo.y, sapo.largura, sapo.altura)
-    }
+    //Desenhando o sapo.
+    ctx.fillStyle = estadoatual.sapo.cor
+    ctx.fillRect(estadoatual.sapo.x, estadoatual.sapo.y, estadoatual.sapo.largura, estadoatual.sapo.altura)
 
 }
+
+//Função que define como a tela de Game Over será desenhada.
 function drawgameover(){
     //Desenha uma tela semi-transparente
     ctx.fillStyle = 'rgba(95, 91, 91, 1)'
@@ -190,61 +225,93 @@ function drawgameover(){
 }
 
 
-// Utilização do 'requestAnimationFrame' para otimizar a animação.
+/* Utilização do 'requestAnimationFrame' para otimizar a animação.
+o jogo prosseguirá normalmente enquanto o "GameStatus" for "jogando", porém
+sempre que ocorrer uma colisão indesejada, o "jogando" é substituido por
+"gameover", que logo mais será usado para resetar o jogo.*/
 function gameloop(){
-        if ( situação === 'jogando'){
+    if (estadoatual.GameStatus === "jogando"){
     let proximoestado = movercarros(estadoatual)
     proximoestado = moverObjetosLago(proximoestado)
-    const frog = proximoestado.sapo
+    const sapo = proximoestado.sapo;
 
-    if(colidiu(frog, proximoestado.carro1) || // Verifica se ocorreu a colisão entre o sapo e os carros ou o lago.
-       colidiu(frog, proximoestado.carro2)) {
-        situação = 'gameover'; 
-       } else {
-        if (colidiu(frog, proximoestado.lago)){
-        if (colidiu(frog,proximoestado.tronco1)) {
-
+    if (
+        colidiu(sapo, proximoestado.carro1) ||
+        colidiu(sapo, proximoestado.carro2) ||
+        colidiu(sapo, proximoestado.carro3)
+    ) {
+        /* Caso o movimento seja realmente efetuado, ou seja, se a posição do sapo mudou, o som designado para este é disparado.
+        Porém, é preciso destacar que, por essência, ".play()", não é funcional, pois inevitavelmente precisa da atuação de agentes
+        fora do seu escopo, o que a torna impura. Por outro lado, esta também é a única maneira simples e com a menor quantidade
+        de efeitos colaterais de se adicionar sons ao código.  (!) */
+        somdecolisão.play() //(!)
+        proximoestado = {...proximoestado, GameStatus: "gameover"}
+    } else { 
+        /* Se o sapo colidir com a área do lago, será averiguado se ele também colide com algum tronco, se colidir, o sapo está
+        seguro, do contrário, o jogo reseta.
+        Quando o sapo colidir com o tronco, ele é "arrastado", assim, também começa a ser afetado pela velocidade deste. */
+        if (colidiu(sapo, proximoestado.lago)) {
+            if( 
+                /* Se os troncos fizerem o sapo sair da tela delimitada pelo canva, o jogo também reseta,
+            tendo em vista que, assim, o sapo cairia na água. */
+                proximoestado.sapo.x > - proximoestado.sapo.largura && 
+                proximoestado.sapo.x < 600
+            ){
+            if (colidiu(sapo,proximoestado.tronco1)) {
                 proximoestado = {
                     ...proximoestado,
-                        sapo: {
-                            ...frog,
-                            x: frog.x + proximoestado.tronco1.velocidade                        
-                        }
+                    sapo:{ 
+                        ...sapo, 
+                        x: sapo.x + proximoestado.tronco1.velocidade }
                     }
-                        }else{
-                        if (colidiu(frog,proximoestado.tronco2)){
-                            proximoestado ={
-                                ...proximoestado,
-                                sapo:{
-                                    ...frog,
-                                    x:frog.x + proximoestado.tronco2.velocidade
+                } else {
+                    if (colidiu(sapo,proximoestado.tronco2)) {
+                        proximoestado = {
+                            ...proximoestado,
+                            sapo:{ 
+                                ...sapo, 
+                                x: sapo.x + proximoestado.tronco2.velocidade }
+                            }
+                        } else { 
+                            if (colidiu(sapo,proximoestado.tronco3)) {
+                                proximoestado = {
+                                    ...proximoestado,
+                                    sapo:{ 
+                                        ...sapo, 
+                                        x: sapo.x + proximoestado.tronco3.velocidade }
                                 }
-                            }
-                                }else{
-                                    situação = 'gameover'
-                            }
+                             } else {
+                                somdesplash.play() //(!)
+                                proximoestado = {...proximoestado, GameStatus: "gameover"}
                         }
-                    }
-
-
+                    }   
                 }
-                estadoatual = proximoestado
+            } else {
+                somdesplash.play() //(!)
+                proximoestado = {...proximoestado, GameStatus: "gameover"}
             }
-                if (situação === 'gameover'){
-                    drawgameover()
-                }else{
-                    draw()
-                }
-        window.requestAnimationFrame(gameloop)
+        }
     }
 
+    estadoatual = proximoestado;
+}
+
+//Quando o jogador perder, será exibida a tela de "GameOver".
+    if (estadoatual.GameStatus === "gameover"){
+        drawgameover()
+                } else {
+                    draw()
+                }
+    window.requestAnimationFrame(gameloop);
+
+}
 
 window.addEventListener('keydown', e => {
-     //se o jogo acaboy a única tecla que nos interessa é o espaço
-    if (situação === 'gameover'){
+    // Se o jogo acaboy a única tecla que nos interessa é o espaço.
+    if (estadoatual.GameStatus === 'gameover'){
                 if (e.key === ' '){
                     estadoatual = initialState(); // reinicia o jogo
-                    situação = 'jogando'
+                    proximoestado = {...proximoestado, GameStatus: "jogando"}
                 }
                 return // sai da função para não processar as setas 
             }
@@ -252,7 +319,7 @@ window.addEventListener('keydown', e => {
  agora, mesmo que o jogador segure alguma tecla, o evento sera executado apenas uma vez. Para isso, usamos
  da propriedade repeat do event, que detecta se uma tecla foi pressionada ou segurada, assim, quando a tecla
   for segurada, ela não retornará nada além do primeiro passo. */
-   if(situação === 'jogando'){
+    if (estadoatual.GameStatus === 'jogando'){
     if (e.repeat) {return}
 
     else{
@@ -268,26 +335,32 @@ window.addEventListener('keydown', e => {
             é executada. */
             case 'ArrowUp':
                 proximoestado = (estadoatual.sapo.y > 0) ? moversapo(estadoatual, UP) : estadoatual
-                break;
+                break
             case 'ArrowDown':
                 proximoestado = (estadoatual.sapo.y < (400 - estadoatual.sapo.altura)) ? moversapo(estadoatual, DOWN) : estadoatual
-                break;
+                break
             case 'ArrowLeft':
                 proximoestado = (estadoatual.sapo.x > 0) ? moversapo(estadoatual, LEFT) : estadoatual
-                break;
+                break
             case 'ArrowRight':
                 proximoestado = (estadoatual.sapo.x < (600 - estadoatual.sapo.largura)) ? moversapo(estadoatual, RIGHT) : estadoatual
-                break;
-        }   
+                break
+        }
+
+        if ((proximoestado.sapo.x !== estadoatual.sapo.x) ||
+            (proximoestado.sapo.y !== estadoatual.sapo.y)){
+                somdosapo.play() // (!)
+            }
+
+        else{
+
         if(finalizou(proximoestado.sapo)){
             console.log("Você venceu. Resetando...")
             proximoestado = initialState();
-        }
+        }}
         estadoatual = proximoestado;
         }
     }
 })
 
-sapoimg.onload = () => {
-    window.requestAnimationFrame(gameloop);
-} // O jogo se inicia quando a imagem do sapo for carregada.
+gameloop()
