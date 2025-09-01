@@ -35,7 +35,7 @@ const initialState = () => ({
         x: 0,
         y: 120,
         largura: 600,
-        altura: 140, 
+        altura: 120, 
         cor: '#add8e6',
     },
     tronco1: {
