@@ -49,7 +49,7 @@ const initialState = () => ({
     lago: { 
         x: -200,
         y: 120,
-        largura: 800,
+        largura: 850,
         altura: 135, 
         cor: '#338dabff',
     },
