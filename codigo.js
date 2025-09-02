@@ -13,6 +13,7 @@ const somdecolisão = document.getElementById("somdecolisão")
 
 /* Constante que armazena as informações iniciais dos elementos em tela. */
 const initialState = () => ({
+    // Status inicial do jogo
     GameStatus: "jogando", 
     sapo: {
         x: 600/2 - 25, // Centralizado na largura do canvas de 600px.
@@ -142,7 +143,7 @@ const moverObjetosLago = (estado) => {
         x: (estado.tronco2.x + estado.tronco2.velocidade < -estado.tronco2.largura) ? 605 : estado.tronco2.x + estado.tronco2.velocidade
     }
 
-    const proxTronco3 = {// Constante que guarad a próxima posição do tronco3
+    const proxTronco3 = {// Constante que guarda a próxima posição do tronco3
         ...estado.tronco3,
         x: (estado.tronco3.x + estado.tronco3.velocidade > 600) ? -estado.tronco3.largura - 5 : estado.tronco3.x + estado.tronco3.velocidade
     }
@@ -155,15 +156,19 @@ const moverObjetosLago = (estado) => {
     }
 }
 
+// Função pura que verifica se dois retângulos (objetos do jogo) colidiram
 const colidiu = (objeto, sapo) => {
+    /* A função retorna um resultado com '!', pois verifica se os retângulos NÃO COLIDIRAM, 
+    logo, caso colidam, ela retorna true */
     return !(
-        objeto.x + objeto.largura < sapo.x ||
-        objeto.x > sapo.x + sapo.largura ||
-        objeto.y + objeto.altura  < sapo.y ||
-        objeto.y > sapo.y + sapo.altura
+        objeto.x + objeto.largura < sapo.x || // O objeto está completamente à esquerda do sapo
+        objeto.x > sapo.x + sapo.largura || // O objeto está completamente à direita do sapo
+        objeto.y + objeto.altura  < sapo.y || // O objeto está completamente acima do sapo
+        objeto.y > sapo.y + sapo.altura // O objeto está completamente abaixo do sapo
     )
 }
 
+// Verifica se o sapo chegou à borda superior do Canvas (vitória)
 const finalizou = (sapo) => sapo.y <= 0
 
 // Obtenção dos elementos HTML e interação com o DOM.
@@ -230,7 +235,9 @@ o jogo prosseguirá normalmente enquanto o "GameStatus" for "jogando", porém
 sempre que ocorrer uma colisão indesejada, o "jogando" é substituido por
 "gameover", que logo mais será usado para resetar o jogo.*/
 function gameloop(){
+    // A lógica do jogo só é executada se o status for "jogando".
     if (estadoatual.GameStatus === "jogando"){
+    // Primeiro calcula o próximo estado movendo carros e troncos.
     let proximoestado = movercarros(estadoatual)
     proximoestado = moverObjetosLago(proximoestado)
     const sapo = proximoestado.sapo;
@@ -257,7 +264,9 @@ function gameloop(){
                 proximoestado.sapo.x > - proximoestado.sapo.largura && 
                 proximoestado.sapo.x < 600
             ){
+            // Se o sapo está no lago, verifica se colidiu com um tronco.
             if (colidiu(sapo,proximoestado.tronco1)) {
+                // Se estiver no tronco 1, o sapo anda com ele, e a mesma lógica para os outros troncos.
                 proximoestado = {
                     ...proximoestado,
                     sapo:{ 
@@ -281,18 +290,20 @@ function gameloop(){
                                         x: sapo.x + proximoestado.tronco3.velocidade }
                                 }
                              } else {
+                                // Se está no lago, mas não em um tronco, o player perdeu.
                                 somdesplash.play() //(!)
                                 proximoestado = {...proximoestado, GameStatus: "gameover"}
                         }
                     }   
                 }
             } else {
+                // Se o sapo é levado para fora da tela por um tronco, o jogo também acaba.  
                 somdesplash.play() //(!)
                 proximoestado = {...proximoestado, GameStatus: "gameover"}
             }
         }
     }
-
+    // Atualiza o estado do jogo 
     estadoatual = proximoestado;
 }
 
@@ -300,14 +311,16 @@ function gameloop(){
     if (estadoatual.GameStatus === "gameover"){
         drawgameover()
                 } else {
+                    // Caso ele não perca, o jogo desenha os elementos normalmente.
                     draw()
                 }
+    // Pede ao navegador para chamar a função gameloop novamente na próxima atualização.
     window.requestAnimationFrame(gameloop);
 
 }
-
+// Implementação de um "ouvinte" para o teclado.
 window.addEventListener('keydown', e => {
-    // Se o jogo acaboy a única tecla que nos interessa é o espaço.
+    // Se o jogo acabou a única tecla que nos interessa é o espaço.
     if (estadoatual.GameStatus === 'gameover'){
                 if (e.key === ' '){
                     estadoatual = initialState(); // reinicia o jogo
@@ -346,21 +359,22 @@ window.addEventListener('keydown', e => {
                 proximoestado = (estadoatual.sapo.x < (600 - estadoatual.sapo.largura)) ? moversapo(estadoatual, RIGHT) : estadoatual
                 break
         }
-
+        // Se o sapo se mover, o som do pulo toca.
         if ((proximoestado.sapo.x !== estadoatual.sapo.x) ||
             (proximoestado.sapo.y !== estadoatual.sapo.y)){
                 somdosapo.play() // (!)
             }
 
         else{
-
+        // Se o sapo chegou ao final, o jogo é reiniciado.
         if(finalizou(proximoestado.sapo)){
             console.log("Você venceu. Resetando...")
             proximoestado = initialState();
         }}
+        // Atualiza o estado do jogo com a nova posição do sapo. 
         estadoatual = proximoestado;
         }
     }
 })
-
+// Primeiro início do jogo.
 gameloop()
