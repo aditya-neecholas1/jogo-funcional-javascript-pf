@@ -58,7 +58,7 @@ const initialState = () => ({
         y: 120,
         largura: 140,
         altura: 45,
-        velocidade: 1,
+        velocidade: 1.5,
         cor: "#58381cff"
     },
     tronco2:{
@@ -66,7 +66,7 @@ const initialState = () => ({
         y: 165,
         largura: 180,
         altura: 45,
-        velocidade: -1,
+        velocidade: -1.5,
         cor: "#58381cff"
     },
     tronco3:{
@@ -74,7 +74,7 @@ const initialState = () => ({
         y:210,
         largura:100,
         altura: 45,
-        velocidade: 1,
+        velocidade: 1.5,
         cor: "#58381cff"
     }
 })
@@ -229,6 +229,22 @@ function drawgameover(){
     ctx.fillText('pressione ESPAÇO para continuar', canvas.width / 2, canvas.height / 2 + 20);
 }
 
+//Seguindo a mesma lógica do desenho da tela de GAME OVER, faremos, então, uma tela de vitória.
+function drawvitoria(){
+    //Desenha uma tela semi-transparente
+    ctx.fillStyle = 'rgba(192, 189, 32, 0.8)'
+    ctx.fillRect (0, 0, canvas.width, canvas.height)
+
+    //Configura e desenha o texto
+    ctx.fillStyle = 'white'
+    ctx.textAlign = 'center' //Centraliza o texto horizontalmente
+    ctx.font = '48px sans-serif'
+    ctx.fillText('VOCÊ VENCEU!! (•◡•) ', canvas.width / 2, canvas.height / 2 - 40);
+
+    ctx.font = '24px sans-serif'
+    ctx.fillText('Pressione ESPAÇO para jogar novamente!', canvas.width / 2, canvas.height / 2 + 20);
+}
+
 
 /* Utilização do 'requestAnimationFrame' para otimizar a animação.
 o jogo prosseguirá normalmente enquanto o "GameStatus" for "jogando", porém
@@ -241,6 +257,12 @@ function gameloop(){
     let proximoestado = movercarros(estadoatual)
     proximoestado = moverObjetosLago(proximoestado)
     const sapo = proximoestado.sapo;
+    
+    /*Se a função "finalizou" for disparada o status do jogo muda para "ganhou", que
+    posteriormente será usado para resetar o jogo e mostrar a tela de vitória. */
+    if (finalizou(proximoestado.sapo)){
+                proximoestado = {...proximoestado, GameStatus: "ganhou"} 
+            }
 
     if (
         colidiu(sapo, proximoestado.carro1) ||
@@ -307,21 +329,32 @@ function gameloop(){
     estadoatual = proximoestado;
 }
 
-//Quando o jogador perder, será exibida a tela de "GameOver".
+//Se o jogador perder, será exibida a tela de Game Over, se o jogador vencer, será exibida a tela de vitória.
     if (estadoatual.GameStatus === "gameover"){
         drawgameover()
                 } else {
-                    // Caso ele não perca, o jogo desenha os elementos normalmente.
+                    if (estadoatual.GameStatus === "ganhou"){
+                        drawvitoria()
+                    } else {
                     draw()
+                    }
                 }
-    // Pede ao navegador para chamar a função gameloop novamente na próxima atualização.
+                
     window.requestAnimationFrame(gameloop);
 
 }
+
 // Implementação de um "ouvinte" para o teclado.
 window.addEventListener('keydown', e => {
     // Se o jogo acabou a única tecla que nos interessa é o espaço.
     if (estadoatual.GameStatus === 'gameover'){
+                if (e.key === ' '){
+                    estadoatual = initialState(); // reinicia o jogo
+                    proximoestado = {...proximoestado, GameStatus: "jogando"}
+                }
+                return // sai da função para não processar as setas 
+            }
+    if (estadoatual.GameStatus === 'ganhou'){
                 if (e.key === ' '){
                     estadoatual = initialState(); // reinicia o jogo
                     proximoestado = {...proximoestado, GameStatus: "jogando"}
